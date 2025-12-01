@@ -3,12 +3,7 @@
 # Fail on any error
 set -e
 
-
-# Set default hostname if not provided
-TAILSCALE_HOSTNAME=${TAILSCALE_HOSTNAME:-tailnet}
-INCLUDE_SABLIER=${INCLUDE_SABLIER:-true}
-GNX_CLI=${GNX_CLI:-true}
-
+# Start tailscaled and wait for it to come up
 tailscaled \
   --state=/tailscale/tailscaled.state \
   --socket=/var/run/tailscale/tailscaled.sock \
@@ -24,6 +19,10 @@ search ${TAILNET_NAME} local
 options ndots:0
 EOF
 
+# Set default hostname if not provided
+if [ -z "${TAILSCALE_HOSTNAME}" ]; then
+  TAILSCALE_HOSTNAME="tailnet"
+fi
 
 # Log in to Tailscale if not already logged in
 if tailscale status 2>/dev/null | grep -q '100\.'; then
@@ -38,6 +37,7 @@ else
   fi
 fi
 
+INCLUDE_SABLIER=${INCLUDE_SABLIER:-true}
 
 if [ "$INCLUDE_SABLIER" = "true" ]; then
   echo "Downloading Sablier v${SABLIER_VERSION}..."

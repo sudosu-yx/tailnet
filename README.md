@@ -1,8 +1,8 @@
-# tailnet
+# Tailnet
 
 **Secure, zero-config ingress using [Tailscale](https://tailscale.com/) and [Caddy](https://caddyserver.com/).**
 
-tailnet allows you to expose containerized services privately over your Tailnet with automatic HTTPS. It bundles Tailscale, Caddy, and popular plugins into a single, easy-to-deploy container.
+Tailnet allows you to expose containerized services privately over your Tailnet with automatic HTTPS. It bundles Tailscale, Caddy, and popular plugins into a single, easy-to-deploy container.
 
 ## Features
 
@@ -20,7 +20,7 @@ tailnet allows you to expose containerized services privately over your Tailnet 
 
 ## Quick Start
 
-The recommended way to run tailnet is via Docker Compose.
+The recommended way to run Tailnet is via Docker Compose.
 
 ### 1. Configure `docker-compose.yaml`
 
@@ -45,7 +45,7 @@ volumes:
 
 ### 2. Create a `Caddyfile`
 
-Create a `Caddyfile` in the same directory. tailnet will serve this configuration over your Tailnet.
+Create a `Caddyfile` in the same directory. Tailnet will serve this configuration over your Tailnet.
 
 ```caddyfile
 # Example: Reverse proxy a service on your Tailnet

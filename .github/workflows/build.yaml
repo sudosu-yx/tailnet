@@ -1,0 +1,36 @@
+name: Build Tailnet (Podman Local Multi-Arch)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repo
+      uses: actions/checkout@v4
+
+    - name: Install Podman + QEMU
+      run: |
+        sudo apt update
+        sudo apt install -y podman qemu-user-static
+
+    - name: Enable multi-arch emulation
+      run: |
+        sudo update-binfmts --enable qemu-arm
+        sudo update-binfmts --enable qemu-aarch64
+
+    - name: Save Images as TAR
+      run: |
+        mkdir artifacts
+        podman save -o artifacts/tailnet-${VERSION}-amd64.tar localhost/sudosu-yx/tailnet:${VERSION}-amd64
+        podman save -o artifacts/tailnet-${VERSION}-arm64.tar localhost/sudosu-yx/tailnet:${VERSION}-arm64
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: tailnet-images
+        path: artifacts/

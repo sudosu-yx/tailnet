@@ -9,7 +9,8 @@ set -e
 # Set default ports
 SABLIER_PORT=${SABLIER_PORT:-10000}
 CADDY_PORT=${CADDY_PORT:-2019}
-GNX_PORT=${GNX_PORT:-8006}
+TAILNET_PORT=${TAILNET_PORT:-2019}
+
 # Track overall health status
 HEALTHY=0
 

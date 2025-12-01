@@ -57,7 +57,7 @@ RUN if [ -n "$PLUGINS" ]; then \
     echo "No plugins specified. Building default caddy"; \
     xcaddy build; \
   fi
-
+  
 
 ################################################################################
 # Stage 2: Runtime
