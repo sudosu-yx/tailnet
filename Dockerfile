@@ -5,7 +5,7 @@
 # Builds Caddy with optional plugins using xcaddy
 ################################################################################
 
-FROM debian:bookworm AS builder
+FROM debian:trixie AS builder
 
 # Golang version for building Caddy
 ARG GOLANG_VERSION=1.25.3
@@ -57,18 +57,14 @@ RUN if [ -n "$PLUGINS" ]; then \
     echo "No plugins specified. Building default caddy"; \
     xcaddy build; \
   fi
-  
+
 
 ################################################################################
 # Stage 2: Runtime
 # Minimal Debian image with Tailscale, Caddy, and optionally Sablier
 ################################################################################
 
-FROM debian:bookworm
-
-# Sablier configuration
-ARG SABLIER_VERSION=1.10.1
-ARG INCLUDE_SABLIER=true
+FROM debian:trixie
 
 # Install runtime dependencies
 RUN apt-get update && \
@@ -86,25 +82,17 @@ RUN apt-get update && \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Tailscale from official repository
-RUN curl -fsSL https://pkgs.tailscale.com/stable/debian/bookworm.noarmor.gpg | tee /usr/share/keyrings/tailscale-archive-keyring.gpg >/dev/null \
- && curl -fsSL https://pkgs.tailscale.com/stable/debian/bookworm.tailscale-keyring.list | tee /etc/apt/sources.list.d/tailscale.list \
+RUN curl -fsSL https://pkgs.tailscale.com/stable/debian/trixie.noarmor.gpg | tee /usr/share/keyrings/tailscale-archive-keyring.gpg >/dev/null \
+ && curl -fsSL https://pkgs.tailscale.com/stable/debian/trixie.tailscale-keyring.list | tee /etc/apt/sources.list.d/tailscale.list \
  && apt-get update \
  && apt-get install -y --no-install-recommends tailscale \
  && rm -rf /var/lib/apt/lists/*
 
-# Install Sablier for dynamic service scaling
+# Sablier version, passed via build-arg
+ARG SABLIER_VERSION
+ENV SABLIER_VERSION=${SABLIER_VERSION}
 
-RUN mkdir -p /etc/sablier
-
-RUN if [ "$INCLUDE_SABLIER" = "true" ]; then \
-  curl -L "https://github.com/sablierapp/sablier/releases/download/v${SABLIER_VERSION}/sablier_${SABLIER_VERSION}_linux-amd64" \
-    -o /usr/bin/sablier \
-    && chmod +x /usr/bin/sablier; \
-  fi
-
-COPY node/conf/sablier.tailnet.yaml /etc/sablier/tailnet.yaml
-
-  # Copy Caddy binary from builder stage
+# Copy Caddy binary from builder stage
 COPY --from=builder /caddy /usr/bin/caddy
 
 # Copy entrypoint and healthcheck scripts

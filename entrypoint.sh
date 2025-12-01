@@ -3,7 +3,12 @@
 # Fail on any error
 set -e
 
-# Start tailscaled and wait for it to come up
+
+# Set default hostname if not provided
+TAILSCALE_HOSTNAME=${TAILSCALE_HOSTNAME:-tailnet}
+INCLUDE_SABLIER=${INCLUDE_SABLIER:-true}
+GNX_CLI=${GNX_CLI:-true}
+
 tailscaled \
   --state=/tailscale/tailscaled.state \
   --socket=/var/run/tailscale/tailscaled.sock \
@@ -19,10 +24,6 @@ search ${TAILNET_NAME} local
 options ndots:0
 EOF
 
-# Set default hostname if not provided
-if [ -z "${TAILSCALE_HOSTNAME}" ]; then
-  TAILSCALE_HOSTNAME="node"
-fi
 
 # Log in to Tailscale if not already logged in
 if tailscale status 2>/dev/null | grep -q '100\.'; then
@@ -30,17 +31,30 @@ if tailscale status 2>/dev/null | grep -q '100\.'; then
 else
   echo "Tailscale not logged in. Using auth key..."
   if [ -n "${TAILSCALE_AUTHKEY}" ]; then
-    tailscale up --ssh --authkey="${TAILSCALE_AUTHKEY}" \
+    tailscale up --authkey="${TAILSCALE_AUTHKEY}" \
                  --hostname="${TAILSCALE_HOSTNAME}"
   else
-    echo "WARNING: No auth key provided; skipping tailscale up and serving."
+    echo "WARNING: No auth key provided; skipping tailscale up."
   fi
 fi
 
-# Start Sablier if available (in background)
-if [ -f /usr/bin/sablier ]; then
-  echo "Starting Tailnet with sablier..."
-  sablier start --configFile=/etc/sablier/tailnet.yaml &
+
+if [ "$INCLUDE_SABLIER" = "true" ]; then
+  echo "Downloading Sablier v${SABLIER_VERSION}..."
+  # Create a temp dir to handle extraction of multiple files (LICENSE, README, etc.)
+  mkdir -p /tmp/sablier_install
+  
+  curl -L "https://github.com/sablierapp/sablier/releases/download/v${SABLIER_VERSION}/sablier-${SABLIER_VERSION}-linux-amd64.tar.gz" \
+    -o /tmp/sablier_install/sablier.tar.gz \
+    && tar -xzf /tmp/sablier_install/sablier.tar.gz -C /tmp/sablier_install \
+    && mv /tmp/sablier_install/sablier /usr/bin/sablier \
+    && chmod +x /usr/bin/sablier \
+    && rm -rf /tmp/sablier_install
+    
+  echo "Sablier installed successfully."
+  
+  echo "Starting Sablier..."
+  sablier start --configFile=/etc/sablier/sablier.yml &
   sleep 2
 fi
 

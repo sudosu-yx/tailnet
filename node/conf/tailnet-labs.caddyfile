@@ -1,7 +1,0 @@
-:443 {
-  bind tailscale/node
-  tls {
-    get_certificate tailscale
-  }
-  reverse_proxy localhost:8006
-}
