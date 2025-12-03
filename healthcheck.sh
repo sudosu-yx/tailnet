@@ -1,4 +1,5 @@
-#!/usr/bin/env sh
+#!/usr/bin/bash
+
 
 # Exit codes:
 # 0 = healthy

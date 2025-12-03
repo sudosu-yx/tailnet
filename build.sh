@@ -1,6 +1,4 @@
-#!/bin/bash
-
-# gh release view -R sablierapp/sablier --json tagName --jq '.tagName | ltrimstr("v")'
+#!/usr/bin/bash
 
 set -e  # Exit immediately if a command exits with a non-zero status
 

@@ -79,6 +79,7 @@ RUN apt-get update && \
       dnsutils \
       openresolv \
       file \
+      iproute2 \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Tailscale from official repository
